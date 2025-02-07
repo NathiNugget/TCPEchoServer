@@ -2,7 +2,7 @@ using ServerFramework.TCPServer;
 
 namespace UseAbstractTCPServer.Server
 {
-    public class MyServer : AbstractTCPServer
+    public class MyServer : AbstractServer
     {
 
         public MyServer(int port) : base(port)
