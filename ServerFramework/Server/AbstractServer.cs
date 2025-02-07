@@ -9,6 +9,7 @@ namespace ServerFramework.TCPServer
         protected bool _running;
         protected int _attempts;
         protected string _password;
+        private List<IPAddress> _addressesBanned;
 
         /// <summary>
         /// Abstract class to represent a server-implmentation
@@ -20,6 +21,7 @@ namespace ServerFramework.TCPServer
             _running = true;
             _attempts = 3;
             _password = "swagster123";
+            _addressesBanned = new List<IPAddress>();
         }
 
         /// <summary>
@@ -38,19 +40,37 @@ namespace ServerFramework.TCPServer
 
             TcpListener stopListener = new TcpListener(IPAddress.Any, PORT + 1);
             stopListener.Start();
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 while (_running)
                 {
                     if (stopListener.Pending())
                     {
                         TcpClient client = stopListener.AcceptTcpClient();
-                        if (HandleStopClient(client))
+                        if (_addressesBanned.Contains(((IPEndPoint)client.Client.RemoteEndPoint).Address!))
                         {
-                            Thread.Sleep(5000);
-                            _running = false;
-                            client.Close();
+                            StreamWriter sw = new StreamWriter(client.GetStream());
+                            sw.WriteLine("Du er banned, begone!");
+                            sw.Flush();
+                            client.Dispose(); 
                         }
-                        else { DenyClient(client); }
+                        else
+                        {
+                            if (HandleStopClient(client))
+                            {
+                                Thread.Sleep(5000);
+                                _running = false;
+                                client.Dispose();
+                            }
+                            else
+                            {
+                         
+                                _addressesBanned.Add(((IPEndPoint)client.Client.RemoteEndPoint).Address);
+                                client.Dispose();
+                            }
+                        }
+
+
 
                     }
                     else Thread.Sleep(1000);
@@ -83,7 +103,7 @@ namespace ServerFramework.TCPServer
                 }
                 else
                 {
-                    Thread.Sleep(1000); 
+                    Thread.Sleep(1000);
                 }
 
 
@@ -108,6 +128,7 @@ namespace ServerFramework.TCPServer
             sw.WriteLine("Skriv adgangskode!");
             bool solved = false;
             string input;
+            _attempts = 3; 
             while (_attempts > 0)
             {
                 input = sr.ReadLine()!;
@@ -116,20 +137,12 @@ namespace ServerFramework.TCPServer
                 {
                     solved = true;
                     sw.WriteLine("Du skrev rigtigt, server lukker nu ned..");
-                    break; 
+                    break;
                 }
             }
-            client.Dispose(); 
-            client.Close();
             return solved;
         }
 
-        protected void DenyClient(TcpClient client)
-        {
-            StreamWriter sw = new StreamWriter(client.GetStream());
-            sw.AutoFlush = true;
-            sw.WriteLine("Du har skrevet forkert adgangskode! Du har messed up, server lukker ikke, lol");
-        }
 
         protected void DoOneClient(TcpClient sock)
         {
@@ -138,10 +151,10 @@ namespace ServerFramework.TCPServer
 
             sw.AutoFlush = true;
             Console.WriteLine("Handle one client");
-            
-                TCPServerWork(sr, sw);
+
+            TCPServerWork(sr, sw);
             sock.Dispose();
-            
+
             sock.Close();
 
 

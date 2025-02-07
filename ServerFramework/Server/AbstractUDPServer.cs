@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -16,31 +15,31 @@ namespace ServerFramework.AbstractUDPServer
 
         public void Start()
         {
-            
+
             UdpClient listener = new UdpClient(11000);
             IPEndPoint groupEP = new IPEndPoint(IPAddress.Any, 11000);
 
-            
-                try
-                {
-                    while (true)
-                    {
-                        Console.WriteLine("Waiting for broadcast");
-                        byte[] bytes = listener.Receive(ref groupEP);
 
-                        Console.WriteLine($"Received broadcast from {groupEP} :");
-                        Console.WriteLine($" {Encoding.ASCII.GetString(bytes, 0, bytes.Length)}");
-                    }
-                }
-                catch (SocketException e)
+            try
+            {
+                while (true)
                 {
-                    Console.WriteLine(e);
+                    Console.WriteLine("Waiting for broadcast");
+                    byte[] bytes = listener.Receive(ref groupEP);
+
+                    Console.WriteLine($"Received broadcast from {groupEP} :");
+                    Console.WriteLine($" {Encoding.ASCII.GetString(bytes, 0, bytes.Length)}");
                 }
-                finally
-                {
-                    listener.Close();
-                }
-            
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(e);
+            }
+            finally
+            {
+                listener.Close();
+            }
+
 
 
         }

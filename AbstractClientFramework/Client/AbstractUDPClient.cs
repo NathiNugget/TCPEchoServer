@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ClientFramework.Client
 {
@@ -26,8 +21,8 @@ namespace ClientFramework.Client
 
 
 
-            byte[] sendbuf = Encoding.ASCII.GetBytes("Sender data over UDP"); 
-           
+            byte[] sendbuf = Encoding.ASCII.GetBytes("Sender data over UDP");
+
             client.Send(sendbuf);
 
             Console.WriteLine("Message sent to the broadcast address");
@@ -35,6 +30,6 @@ namespace ClientFramework.Client
 
         }
 
-       
+
     }
 }
