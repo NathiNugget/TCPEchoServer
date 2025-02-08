@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Xml;
 
 namespace ServerFramework.TCPServer
 {
@@ -10,17 +12,52 @@ namespace ServerFramework.TCPServer
         protected int _attempts;
         protected string _password;
         private List<IPAddress> _addressesBanned;
+        protected TraceSource ts; 
 
         /// <summary>
         /// Abstract class to represent a server-implmentation
         /// </summary>
         /// <param name="port">Number to listen for connections</param>
-        public AbstractServer(int port)
+        public AbstractServer()
         {
-            PORT = port;
-            _running = true;
-            _attempts = 3;
-            _password = "swagster123";
+            ts.Listeners.Add(); 
+
+
+            XmlDocument doc = new XmlDocument();
+            string path = Environment.GetEnvironmentVariable("AbstractConfigPath")!;
+
+
+            doc.Load(path);
+            XmlNode port_number = doc.SelectSingleNode("ServerPort")!;
+            if (port_number != null)
+            {
+                PORT = int.Parse(port_number.InnerText.Trim());
+            }
+            else PORT = 32;
+
+            XmlNode running_node = doc.SelectSingleNode("Running")!;
+            if (running_node != null)
+            {
+                _running = bool.Parse(running_node.InnerText.Trim());
+            }
+            else _running = true;
+
+            XmlNode attempts_node = doc.SelectSingleNode("Attempts")!;
+            if (attempts_node != null)
+            {
+                _attempts = int.Parse((attempts_node.InnerText).Trim());
+
+            }
+            else
+            {
+                _attempts = 3;
+            }
+            XmlNode pass_node = doc.SelectSingleNode("Password")!;
+            if (pass_node != null)
+            {
+                _password = pass_node.InnerText.Trim();
+            }
+            else _password = "swagster123";
             _addressesBanned = new List<IPAddress>();
         }
 
@@ -52,7 +89,7 @@ namespace ServerFramework.TCPServer
                             StreamWriter sw = new StreamWriter(client.GetStream());
                             sw.WriteLine("Du er banned, begone!");
                             sw.Flush();
-                            client.Dispose(); 
+                            client.Dispose();
                         }
                         else
                         {
@@ -64,7 +101,7 @@ namespace ServerFramework.TCPServer
                             }
                             else
                             {
-                         
+
                                 _addressesBanned.Add(((IPEndPoint)client.Client.RemoteEndPoint).Address);
                                 client.Dispose();
                             }
@@ -128,7 +165,7 @@ namespace ServerFramework.TCPServer
             sw.WriteLine("Skriv adgangskode!");
             bool solved = false;
             string input;
-            _attempts = 3; 
+            _attempts = 3;
             while (_attempts > 0)
             {
                 input = sr.ReadLine()!;

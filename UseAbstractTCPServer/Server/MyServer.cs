@@ -5,7 +5,7 @@ namespace UseAbstractTCPServer.Server
     public class MyServer : AbstractServer
     {
 
-        public MyServer(int port) : base(port)
+        public MyServer() : base()
         { }
 
         public override void TCPServerWork(StreamReader sr, StreamWriter sw)
